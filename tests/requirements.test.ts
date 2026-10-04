@@ -15,6 +15,7 @@ test("loads scored scenario lists", () => {
     "tools-list",
     "tools-call-simple-text",
     "completion-complete",
+    "resources-list",
   ]);
   expect(set.client).toEqual(["tools_call", "request-metadata"]);
 });

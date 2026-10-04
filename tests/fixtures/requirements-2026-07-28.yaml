@@ -3,6 +3,7 @@ server:
   - tools-list
   - tools-call-simple-text
   - completion-complete
+  - resources-list
 client:
   - tools_call
   - request-metadata
