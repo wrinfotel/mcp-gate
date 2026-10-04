@@ -2,7 +2,7 @@ name: "MCP Conformance Gate"
 description: >-
   Run the official MCP conformance suite against your MCP server:
   PR report, scenario coverage against frozen requirement sets, and a compliance badge.
-author: "mcp-gate"
+author: "wrinfotel"
 
 branding:
   icon: "shield"
