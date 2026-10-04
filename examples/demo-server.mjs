@@ -4,30 +4,36 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import http from "node:http";
 import { z } from "zod";
 
-const server = new McpServer({ name: "mcp-gate-demo", version: "1.0.0" });
+// A fresh McpServer per request: one shared instance cannot serve multiple
+// per-request transports ("Already connected to a transport").
+function createMcpServer() {
+  const server = new McpServer({ name: "mcp-gate-demo", version: "1.0.0" });
 
-server.registerTool(
-  "echo",
-  { title: "Echo", description: "Echoes text back", inputSchema: { text: z.string() } },
-  async ({ text }) => ({ content: [{ type: "text", text: `echo: ${text}` }] }),
-);
+  server.registerTool(
+    "echo",
+    { title: "Echo", description: "Echoes text back", inputSchema: { text: z.string() } },
+    async ({ text }) => ({ content: [{ type: "text", text: `echo: ${text}` }] }),
+  );
 
-server.registerResource(
-  "demo",
-  "demo://info",
-  { description: "Demo resource" },
-  async (uri) => ({
-    contents: [{ uri: uri.href, mimeType: "text/plain", text: "demo resource body" }],
-  }),
-);
+  server.registerResource(
+    "demo",
+    "demo://info",
+    { description: "Demo resource" },
+    async (uri) => ({
+      contents: [{ uri: uri.href, mimeType: "text/plain", text: "demo resource body" }],
+    }),
+  );
 
-server.registerPrompt(
-  "greet",
-  { title: "Greet", argsSchema: { name: z.string() } },
-  async ({ name }) => ({
-    messages: [{ role: "user", content: { type: "text", text: `Hello, ${name}!` } }],
-  }),
-);
+  server.registerPrompt(
+    "greet",
+    { title: "Greet", argsSchema: { name: z.string() } },
+    async ({ name }) => ({
+      messages: [{ role: "user", content: { type: "text", text: `Hello, ${name}!` } }],
+    }),
+  );
+
+  return server;
+}
 
 http
   .createServer(async (req, res) => {
@@ -46,7 +52,7 @@ http
         enableJsonValidation: false,
       });
       res.on("close", () => transport.close());
-      await server.connect(transport);
+      await createMcpServer().connect(transport);
       await transport.handleRequest(req, res);
     } catch (err) {
       console.error("handler error", err);
