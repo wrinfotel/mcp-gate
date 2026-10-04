@@ -5,7 +5,7 @@ description: >-
 author: "mcp-gate"
 
 branding:
-  icon: "shield-check"
+  icon: "shield"
   color: "blue"
 
 inputs:

@@ -10,7 +10,7 @@ linked to the spec, scenario coverage against frozen requirement sets, and a
 "N% compliant / Tier" badge via shields.io. SEP-1730 defines the tiers: Tier 1 = 100% of
 the revision's required scenarios, Tier 2 = ≥80%. Conformance tests are now mandatory for
 SEP Final status (SEP-2484), so if you maintain an MCP server this belongs in your CI.
-No secrets beyond the default GITHUB_TOKEN; badge.json is committed to an orphan branch.
+No secrets beyond the default GITHUB_TOKEN; badge.json is committed to a dedicated badge branch.
 
 ## r/mcp post (draft)
 
