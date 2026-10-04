@@ -4,6 +4,10 @@ description: >-
   PR report, scenario coverage against frozen requirement sets, and a compliance badge.
 author: "mcp-gate"
 
+branding:
+  icon: "shield-check"
+  color: "blue"
+
 inputs:
   url:
     description: "HTTP URL of the MCP server under test (must be reachable from the runner)"
