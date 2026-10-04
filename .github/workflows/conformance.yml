@@ -1,0 +1,35 @@
+name: conformance-gate
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - run: npm install --prefix examples
+      - run: node examples/demo-server.mjs & echo $! > server.pid
+      - name: Wait for server
+        run: |
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:3123/health && break
+            sleep 1
+          done
+      - name: Run mcp-gate
+        uses: ./
+        with:
+          url: http://localhost:3123/mcp
+          requirements: "2025-11-25"
+          fail-on-noncompliant: "false"
+      - run: kill $(cat server.pid) || true
+        if: always()
