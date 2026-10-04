@@ -2,7 +2,6 @@
   "name": "mcp-gate",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
   "description": "GitHub Action: MCP conformance gate — PR report, scenario coverage, compliance badge over the official MCP conformance runner",
   "main": "dist/index.js",
   "scripts": {
