@@ -1,0 +1,16 @@
+server:
+  - server-stateless
+  - tools-list
+  - tools-call-simple-text
+  - completion-complete
+client:
+  - tools_call
+  - request-metadata
+not_scored:
+  - scenario: tasks-lifecycle
+    leg: server
+    reason: extension
+    note: SEP-2631 tasks extension
+  - scenario: json-schema-2020-12
+    leg: server
+    reason: pending
