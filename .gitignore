@@ -1,3 +1,6 @@
 .superpowers/
 node_modules/
 *.log
+# local working documents (not part of the public action repo)
+docs/spec.md
+docs/plan-mcp-gate.md
