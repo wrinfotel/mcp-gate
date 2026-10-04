@@ -24,8 +24,10 @@ async function run(): Promise<void> {
   const resultsDir = join(work, "results");
   mkdirSync(runnerDir, { recursive: true });
 
+  // On win32, spawning "npm" directly throws ENOENT (npm is npm.cmd there).
+  const npmCmd = process.platform === "win32" ? "npm.cmd" : "npm";
   core.info(`Installing @modelcontextprotocol/conformance@${runnerVersion}`);
-  const installExit = await exec("npm", [
+  const installExit = await exec(npmCmd, [
     "install",
     `@modelcontextprotocol/conformance@${runnerVersion}`,
     "--prefix",

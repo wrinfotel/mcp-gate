@@ -30039,8 +30039,10 @@ async function run() {
     const runnerDir = (0, node_path_1.join)(work, "runner");
     const resultsDir = (0, node_path_1.join)(work, "results");
     (0, node_fs_1.mkdirSync)(runnerDir, { recursive: true });
+    // On win32, spawning "npm" directly throws ENOENT (npm is npm.cmd there).
+    const npmCmd = process.platform === "win32" ? "npm.cmd" : "npm";
     core.info(`Installing @modelcontextprotocol/conformance@${runnerVersion}`);
-    const installExit = await (0, exec_1.exec)("npm", [
+    const installExit = await (0, exec_1.exec)(npmCmd, [
         "install",
         `@modelcontextprotocol/conformance@${runnerVersion}`,
         "--prefix",
