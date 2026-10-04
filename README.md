@@ -1,8 +1,6 @@
 # mcp-gate
 
-<!-- Badge placeholder: uncomment after replacing OWNER with your real org/username.
-[![MCP](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FOWNER%2Fmcp-gate%2Fbadge%2Fbadge.json)](https://github.com/OWNER/mcp-gate/actions)
--->
+[![MCP](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fwrinfotel%2Fmcp-gate%2Fbadge%2Fbadge.json)](https://github.com/wrinfotel/mcp-gate/actions)
 
 Run the official [MCP conformance suite](https://github.com/modelcontextprotocol/conformance) against your MCP server in CI — with a **PR report**, **scenario coverage against frozen requirement sets**, and a **compliance badge**.
 
@@ -11,7 +9,7 @@ Run the official [MCP conformance suite](https://github.com/modelcontextprotocol
 Start your server in a step, then:
 
 ```yaml
-- uses: OWNER/mcp-gate@v0.1
+- uses: wrinfotel/mcp-gate@v0.1
   with:
     url: http://localhost:3000/mcp
 ```
