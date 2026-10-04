@@ -1,0 +1,55 @@
+name: "MCP Conformance Gate"
+description: >-
+  Run the official MCP conformance suite against your MCP server:
+  PR report, scenario coverage against frozen requirement sets, and a compliance badge.
+author: "mcp-gate"
+
+inputs:
+  url:
+    description: "HTTP URL of the MCP server under test (must be reachable from the runner)"
+    required: true
+  requirements:
+    description: "Frozen requirement set revision, e.g. 2025-11-25 or 2026-07-28"
+    required: false
+    default: "2026-07-28"
+  runner-version:
+    description: "Pinned version of @modelcontextprotocol/conformance"
+    required: false
+    default: "0.2.0-alpha.12"
+  expected-failures:
+    description: "Path to YAML baseline of expected failures (passed through to the runner)"
+    required: false
+  timeout-ms:
+    description: "Per-scenario timeout passed to the runner"
+    required: false
+    default: "30000"
+  badge:
+    description: "Publish badge.json to the badge branch ('true'/'false')"
+    required: false
+    default: "true"
+  badge-branch:
+    description: "Branch holding badge.json for shields.io"
+    required: false
+    default: "badge"
+  fail-on-noncompliant:
+    description: "Fail the job if the runner exits non-zero"
+    required: false
+    default: "true"
+  github-token:
+    description: "Token for PR comments and badge commits"
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  pass-rate:
+    description: "Fraction (0-1) of scored set scenarios passing"
+  tier:
+    description: "1, 2 or 0 (none) per SEP-1730"
+  coverage:
+    description: "'run/total' scored scenarios of the frozen set"
+  report-markdown:
+    description: "Full markdown report"
+
+runs:
+  using: "node24"
+  main: "dist/index.js"
