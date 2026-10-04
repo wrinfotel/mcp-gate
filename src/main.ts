@@ -1,4 +1,4 @@
-import { appendFileSync, mkdirSync } from "node:fs";
+import { appendFileSync, existsSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import * as core from "@actions/core";
@@ -10,6 +10,7 @@ import { parseStdout } from "./parse-stdout.js";
 import { upsertComment } from "./pr-comment.js";
 import { buildReport, renderMarkdown } from "./report.js";
 import { loadRequirementSet } from "./requirements.js";
+import type { Check } from "./types.js";
 
 async function run(): Promise<void> {
   const url = core.getInput("url", { required: true });
@@ -65,17 +66,25 @@ async function run(): Promise<void> {
     ignoreReturnCode: true,
     listeners: { stdout: (d: Buffer) => (stdout += d.toString()) },
   });
+  if (runExit !== 0) {
+    // Surface the runner's own output before parsing — it usually holds the
+    // actual error (bad URL, bad revision, install problems).
+    core.info(stdout);
+  }
 
   const set = loadRequirementSet(
     join(pkgDir, "requirements", `${revision}.yaml`),
     revision,
   );
-  const report = buildReport(
-    parseStdout(stdout),
-    collectChecks(resultsDir),
-    set,
-    runnerVersion,
-  );
+  let checks = new Map<string, Check[]>();
+  if (existsSync(resultsDir)) {
+    checks = collectChecks(resultsDir);
+  } else {
+    core.warning(
+      "runner produced no results directory; report will show 0 coverage",
+    );
+  }
+  const report = buildReport(parseStdout(stdout), checks, set, runnerVersion);
   const markdown = renderMarkdown(report, url);
 
   core.setOutput("pass-rate", report.passRate.toFixed(4));
@@ -88,64 +97,76 @@ async function run(): Promise<void> {
 
   const prNumber = github.context.payload.pull_request?.number;
   if (prNumber && token) {
-    const octokit = github.getOctokit(token);
-    const { owner, repo } = github.context.repo;
-    await upsertComment(octokit, owner, repo, prNumber, markdown);
+    try {
+      const octokit = github.getOctokit(token);
+      const { owner, repo } = github.context.repo;
+      await upsertComment(octokit, owner, repo, prNumber, markdown);
+    } catch (err) {
+      core.warning(
+        `PR comment skipped: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
   }
 
-  if (badge && token) {
-    const octokit = github.getOctokit(token);
-    const { owner, repo } = github.context.repo;
-    const json = `${JSON.stringify(badgeFor(report))}\n`;
-    let _branchSha: string | undefined;
+  // Skip the badge on pull_request events: a PR that breaks conformance must
+  // not flip the repo's README badge red before it is merged. The badge is
+  // published from pushes to the repository instead.
+  if (badge && token && !github.context.payload.pull_request) {
     try {
-      const ref = await octokit.rest.git.getRef({
-        owner,
-        repo,
-        ref: `heads/${badgeBranch}`,
-      });
-      _branchSha = ref.data.object.sha;
-    } catch {
-      const base = await octokit.rest.git.getRef({
-        owner,
-        repo,
-        ref: `heads/${github.context.payload.repository?.default_branch ?? "main"}`,
-      });
-      const created = await octokit.rest.git.createRef({
-        owner,
-        repo,
-        ref: `refs/heads/${badgeBranch}`,
-        sha: base.data.object.sha,
-      });
-      _branchSha = created.data.object.sha;
-    }
-    // PUT contents: если файл существует — нужен его текущий sha
-    let fileSha: string | undefined;
-    try {
-      const file = await octokit.rest.repos.getContent({
+      const octokit = github.getOctokit(token);
+      const { owner, repo } = github.context.repo;
+      const json = `${JSON.stringify(badgeFor(report))}\n`;
+      try {
+        await octokit.rest.git.getRef({
+          owner,
+          repo,
+          ref: `heads/${badgeBranch}`,
+        });
+      } catch {
+        const base = await octokit.rest.git.getRef({
+          owner,
+          repo,
+          ref: `heads/${github.context.payload.repository?.default_branch ?? "main"}`,
+        });
+        await octokit.rest.git.createRef({
+          owner,
+          repo,
+          ref: `refs/heads/${badgeBranch}`,
+          sha: base.data.object.sha,
+        });
+      }
+      // PUT contents: если файл существует — нужен его текущий sha
+      let fileSha: string | undefined;
+      try {
+        const file = await octokit.rest.repos.getContent({
+          owner,
+          repo,
+          path: "badge.json",
+          ref: badgeBranch,
+        });
+        if (!Array.isArray(file.data)) fileSha = file.data.sha;
+      } catch {
+        /* файла ещё нет */
+      }
+      await octokit.rest.repos.createOrUpdateFileContents({
         owner,
         repo,
         path: "badge.json",
-        ref: badgeBranch,
+        branch: badgeBranch,
+        sha: fileSha,
+        message: "chore: update conformance badge [skip ci]",
+        content: Buffer.from(json, "utf8").toString("base64"),
       });
-      if (!Array.isArray(file.data)) fileSha = file.data.sha;
-    } catch {
-      /* файла ещё нет */
+      core.info(
+        `Badge: https://img.shields.io/endpoint?url=${encodeURIComponent(
+          `https://raw.githubusercontent.com/${owner}/${repo}/${badgeBranch}/badge.json`,
+        )}`,
+      );
+    } catch (err) {
+      core.warning(
+        `badge update skipped: ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
-    await octokit.rest.repos.createOrUpdateFileContents({
-      owner,
-      repo,
-      path: "badge.json",
-      branch: badgeBranch,
-      sha: fileSha,
-      message: "chore: update conformance badge [skip ci]",
-      content: Buffer.from(json, "utf8").toString("base64"),
-    });
-    core.info(
-      `Badge: https://img.shields.io/endpoint?url=${encodeURIComponent(
-        `https://raw.githubusercontent.com/${owner}/${repo}/${badgeBranch}/badge.json`,
-      )}`,
-    );
   }
 
   if (runExit !== 0 && core.getBooleanInput("fail-on-noncompliant")) {
