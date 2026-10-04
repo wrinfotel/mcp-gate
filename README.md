@@ -1,6 +1,8 @@
 # mcp-gate
 
+<!-- Badge placeholder: uncomment after replacing OWNER with your real org/username.
 [![MCP](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FOWNER%2Fmcp-gate%2Fbadge%2Fbadge.json)](https://github.com/OWNER/mcp-gate/actions)
+-->
 
 Run the official [MCP conformance suite](https://github.com/modelcontextprotocol/conformance) against your MCP server in CI — with a **PR report**, **scenario coverage against frozen requirement sets**, and a **compliance badge**.
 
@@ -14,7 +16,7 @@ Start your server in a step, then:
     url: http://localhost:3000/mcp
 ```
 
-That's it. You get a step summary, a PR comment (one, updated in place), and outputs (`pass-rate`, `tier`, `coverage`).
+That's it. You get a step summary, a PR comment (one, updated in place), and outputs (`pass-rate`, `tier`, `coverage`, `report-markdown`).
 
 ## Inputs
 
@@ -23,10 +25,11 @@ That's it. You get a step summary, a PR comment (one, updated in place), and out
 | `url` | — | MCP server URL (required) |
 | `requirements` | `2026-07-28` | Frozen requirement set revision |
 | `runner-version` | `0.2.0-alpha.12` | Pinned `@modelcontextprotocol/conformance` version |
-| `expected-failures` | — | Baseline YAML passed through to the runner |
+| `expected-failures` | — | Baseline YAML passed through to the runner. Baselined scenarios that still fail are reported as failures — the tier will read 0 even though the gate passes (v0.1 limitation; the job exit code is correct). |
 | `timeout-ms` | `30000` | Per-scenario timeout |
-| `badge` | `true` | Publish `badge.json` to the badge branch |
+| `badge` | `true` | Publish `badge.json` to the badge branch (skipped on `pull_request` events) |
 | `badge-branch` | `badge` | Branch for badge JSON |
+| `github-token` | `${{ github.token }}` | Token for the PR comment and badge commits; needs `pull-requests: write` (comments) and `contents: write` (badge) |
 | `fail-on-noncompliant` | `true` | Fail the job on conformance failures |
 
 ## Badge
@@ -44,7 +47,7 @@ The workflow needs `permissions: contents: write` (badge) and `pull-requests: wr
 - **Tier 1** — 100% of the frozen set's scored scenarios pass
 - **Tier 2** — ≥ 80%
 
-Your server only earns a tier when the whole set ran. Scenario coverage (`run/total`) is always reported.
+Your server only earns a tier when the whole set ran. Scenario coverage (`run/total`) is always reported. Note: scenarios baselined via `expected-failures` still count as failures, so the tier reads 0 even when the gate passes (v0.1 limitation).
 
 ## stdio servers
 
