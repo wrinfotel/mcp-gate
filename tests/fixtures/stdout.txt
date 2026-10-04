@@ -1,0 +1,27 @@
+Running requirements 2026-07-28 (50 scenarios) against http://localhost:3123/mcp
+
+
+=== Running scenario: server-stateless ===
+Running client scenario 'server-stateless' against server: http://localhost:3123/mcp
+Results saved to results\server-server-stateless-2026-10-04T14-35-40-265Z
+
+=== Running scenario: tools-list ===
+Running client scenario 'tools-list' against server: http://localhost:3123/mcp
+Results saved to results/server-tools-list-2026-10-04T14-35-40-638Z
+
+=== Scenario Results ===
+
+  ✗ server-stateless: 2 passed, 1 failed
+  ✗ tools-list: 0 passed, 3 failed
+✓ input-required-result-validate-input: 3 passed, 0 failed
+✓ tools-call-simple-text: 2 passed, 0 failed
+✗ tasks-lifecycle: 0 passed, 9 failed
+✓ tasks-status-notifications: 0 passed, 0 failed
+✗ json-schema-2020-12: 0 passed, 2 failed
+
+Total: 11 passed, 146 failed
+
+Not scored for 2026-07-28: 3 scenario(s) run, 2 failing. These do not affect conformance.
+  ✗ tasks-lifecycle (extension)
+  ✓ tasks-status-notifications (extension)
+  ✗ json-schema-2020-12 (pending)
