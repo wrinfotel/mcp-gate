@@ -1,0 +1,30 @@
+[
+  {
+    "id": "completion-complete",
+    "name": "CompletionComplete",
+    "description": "Server responds to completion requests",
+    "status": "FAILURE",
+    "timestamp": "2026-10-04T14:35:40.633Z",
+    "errorMessage": "Failed: Bad Request: Unsupported protocol version: 2026-07-28 (supported versions: 2025-11-25, 2025-06-18, 2025-03-26, 2024-11-05, 2024-10-07)",
+    "specReferences": [
+      {
+        "id": "MCP-Completion",
+        "url": "https://modelcontextprotocol.io/specification/2025-06-18/server/utilities/completion"
+      }
+    ]
+  },
+  {
+    "id": "wire-schema-valid",
+    "name": "WireSchemaValid",
+    "description": "Every JSON-RPC message the implementation sent is valid per the spec JSON schema for the negotiated spec version",
+    "status": "SUCCESS",
+    "timestamp": "2026-10-04T14:35:40.633Z",
+    "specReferences": [
+      {
+        "id": "MCP-Schema",
+        "url": "https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/schema/2025-11-25/schema.json"
+      }
+    ],
+    "details": { "messagesValidated": 4, "violations": [] }
+  }
+]
