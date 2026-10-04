@@ -47,15 +47,17 @@ const five = [
   "resources-list",
 ];
 
-const mk = (names: string[], failing?: string) => {
+const mk = (names: string[], failing?: string | string[]) => {
+  const failingList =
+    failing === undefined ? [] : Array.isArray(failing) ? failing : [failing];
   const scenarios = names.map((name) => ({
     name,
-    ok: name !== failing,
-    passed: name === failing ? 0 : 1,
-    failed: name === failing ? 1 : 0,
+    ok: !failingList.includes(name),
+    passed: failingList.includes(name) ? 0 : 1,
+    failed: failingList.includes(name) ? 1 : 0,
     scored: true,
   }));
-  const failedCount = failing !== undefined && names.includes(failing) ? 1 : 0;
+  const failedCount = failingList.filter((f) => names.includes(f)).length;
   return buildReport(
     {
       revision: "2026-07-28",
@@ -92,6 +94,12 @@ test.each([
     label: "partial run 4 of 5 all passed (run < total)",
     names: five.slice(0, 4),
     failing: undefined,
+    expected: 0,
+  },
+  {
+    label: "full run with two failures (3/5 = 60% < 80%)",
+    names: five,
+    failing: ["server-stateless", "tools-list"],
     expected: 0,
   },
 ])("tier per SEP-1730: $label", ({ names, failing, expected }) => {
