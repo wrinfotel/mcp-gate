@@ -1,1 +1,16 @@
-{ "name": "mcp-gate-demo", "private": true, "type": "module", "dependencies": { "@modelcontextprotocol/sdk": "^1.0.0", "zod": "^3.0.0" } }
+{
+  "name": "mcp-gate-demo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "esbuild src/server.ts --bundle --platform=node --format=esm --outfile=demo-server.mjs --banner:js=\"import { createRequire } from 'module'; const require = createRequire(import.meta.url);\"",
+    "start": "node demo-server.mjs"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/express": "^2.0.2",
+    "@modelcontextprotocol/node": "^2.1.1",
+    "@modelcontextprotocol/server": "^2.3.1",
+    "esbuild": "^0.24.0",
+    "zod": "^4.6.5"
+  }
+}

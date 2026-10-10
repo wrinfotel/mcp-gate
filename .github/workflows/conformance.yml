@@ -18,6 +18,7 @@ jobs:
         with:
           node-version: 22
       - run: npm install --prefix examples
+      - run: npm run build --prefix examples
       - run: node examples/demo-server.mjs & echo $! > server.pid
       - name: Wait for server
         run: |
